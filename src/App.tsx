@@ -143,8 +143,8 @@ export default function App() {
   const generateCommentary = async (targetName: string, targetHex: string, captured: RGB, score: number) => {
     try {
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        throw new Error("API Key is missing");
+      if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY") {
+        throw new Error("Gemini APIキーが設定されていません。AI StudioのSecretsパネルで設定してください。");
       }
       const ai = new GoogleGenAI({ apiKey });
       const capturedHex = rgbToHex(captured);
