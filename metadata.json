@@ -1,0 +1,5 @@
+{
+  "name": "いろあわせ (Iro-Awase)",
+  "description": "お題の色をカメラで撮影して、マッチ度を競うカラーハンティングゲーム。現実世界からぴったりの色を見つけ出そう！",
+  "requestFramePermissions": ["camera"]
+}
