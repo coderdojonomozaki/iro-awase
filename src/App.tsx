@@ -142,9 +142,13 @@ export default function App() {
 
   const generateCommentary = async (targetName: string, targetHex: string, captured: RGB, score: number) => {
     try {
+      // Try to get API key from process.env (Vite define) or a fallback
       const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY") {
-        throw new Error("Gemini APIキーが設定されていません。AI StudioのSecretsパネルで設定してください。");
+      
+      console.log("Checking API Key...");
+      if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY" || apiKey === "") {
+        console.error("API Key is missing or invalid:", apiKey);
+        throw new Error("Gemini APIキーが設定されていません。AI StudioのSecretsパネルで 'GEMINI_API_KEY' を追加してください。");
       }
       const ai = new GoogleGenAI({ apiKey });
       const capturedHex = rgbToHex(captured);
