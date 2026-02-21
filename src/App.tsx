@@ -43,9 +43,6 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Initialize Gemini
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -128,6 +125,11 @@ export default function App() {
 
   const generateCommentary = async (targetName: string, targetHex: string, captured: RGB, score: number) => {
     try {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("API Key is missing");
+      }
+      const ai = new GoogleGenAI({ apiKey });
       const capturedHex = rgbToHex(captured);
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
