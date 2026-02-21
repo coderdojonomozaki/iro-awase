@@ -245,10 +245,10 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FFFBEB] text-[#141414] font-sans selection:bg-[#FFD700] selection:text-black">
       {/* Header */}
-      <header className="border-b-4 border-[#141414] p-6 flex justify-between items-center bg-[#FFD700]">
-        <h1 className="text-2xl font-black tracking-tight flex items-center gap-2">
-          <Sparkles className="fill-white" />
-          いろあわせ！<span className="text-sm opacity-70">カラーハンター</span>
+      <header className="border-b-4 border-[#141414] p-4 sm:p-6 flex justify-between items-center bg-[#FFD700]">
+        <h1 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2 whitespace-nowrap">
+          <Sparkles className="fill-white w-5 h-5 sm:w-6 sm:h-6" />
+          いろあわせ！<span className="text-xs sm:text-sm opacity-70">カラーハンター</span>
         </h1>
         <div className="flex gap-2">
           <button 
@@ -287,7 +287,7 @@ export default function App() {
               </div>
               
               <div className="space-y-4">
-                <h2 className="text-4xl font-black">おなじ色をさがそう！</h2>
+                <h2 className="text-3xl sm:text-4xl font-black whitespace-nowrap">おなじ色をさがそう！</h2>
                 <p className="text-lg font-bold opacity-80">
                   カメラでお題（おだい）の色を<br/>パシャッとさつえいしてね！📸
                 </p>
