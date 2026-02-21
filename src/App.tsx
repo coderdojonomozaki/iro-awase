@@ -142,39 +142,50 @@ export default function App() {
 
   const generateCommentary = async (targetName: string, targetHex: string, captured: RGB, score: number) => {
     try {
-      // Try to get API key from process.env (Vite define) or a fallback
+      // Try to get API key from process.env (Vite define)
       const apiKey = process.env.GEMINI_API_KEY;
       
       console.log("Checking API Key...");
       if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY" || apiKey === "") {
-        console.error("API Key is missing or invalid:", apiKey);
+        console.error("API Key is missing or invalid in process.env. Checking fallback...");
+        // Fallback to a check that might work in some environments
+        const fallbackKey = (window as any).GEMINI_API_KEY;
+        if (fallbackKey) {
+           const ai = new GoogleGenAI({ apiKey: fallbackKey });
+           return await performGeneration(ai);
+        }
         throw new Error("Gemini APIキーが設定されていません。AI StudioのSecretsパネルで 'GEMINI_API_KEY' を追加してください。");
       }
+      
       const ai = new GoogleGenAI({ apiKey });
-      const capturedHex = rgbToHex(captured);
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: `
-          あなたは「いろあわせ！カラーハンター」というゲームの審判です。
-          小学生が遊んでいます。
-          お題の色: ${targetName}
-          撮影された色: ${capturedHex}
-          マッチ度: ${score}%
+      return await performGeneration(ai);
 
-          この結果に対して、短く、とても優しくて楽しい日本語のコメントを1つ生成してください。
-          漢字は少なめにして、ひらがなを多めに使ってください。
-          80点以上なら「すごい！天才！」と褒めちぎり、50点以下でも「おしい！次はもっと似てる色を探そう！」と励ましてください。
-          絵文字をたくさん使ってください。
-        `,
-      });
-      setCommentary(response.text || "いい色だね！✨");
-      setGameState('RESULT');
-      if (score >= 80) {
-        confetti({
-          particleCount: 150,
-          spread: 70,
-          origin: { y: 0.6 }
+      async function performGeneration(aiInstance: any) {
+        const capturedHex = rgbToHex(captured);
+        const response = await aiInstance.models.generateContent({
+          model: "gemini-3-flash-preview",
+          contents: `
+            あなたは「いろあわせ！カラーハンター」というゲームの審判です。
+            小学生が遊んでいます。
+            お題の色: ${targetName}
+            撮影された色: ${capturedHex}
+            マッチ度: ${score}%
+
+            この結果に対して、短く、とても優しくて楽しい日本語のコメントを1つ生成してください。
+            漢字は少なめにして、ひらがなを多めに使ってください。
+            80点以上なら「すごい！天才！」と褒めちぎり、50点以下でも「おしい！次はもっと似てる色を探そう！」と励ましてください。
+            絵文字をたくさん使ってください。
+          `,
         });
+        setCommentary(response.text || "いい色だね！✨");
+        setGameState('RESULT');
+        if (score >= 80) {
+          confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
       }
     } catch (err) {
       console.error("Gemini error:", err);
