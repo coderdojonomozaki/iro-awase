@@ -32,6 +32,9 @@ try {
 
 async function startServer() {
   console.log("Starting server...");
+  console.log("NODE_ENV:", process.env.NODE_ENV);
+  console.log("Current directory:", process.cwd());
+
   const app = express();
   const PORT = 3000;
 
@@ -39,12 +42,14 @@ async function startServer() {
 
   // Logging middleware
   app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
   });
 
-  // API Routes
-  app.get("/api/rankings", (req, res) => {
+  // API Routes (defined BEFORE static/vite middleware)
+  const rankingsRouter = express.Router();
+
+  rankingsRouter.get("/", (req, res) => {
     try {
       const { color_name } = req.query;
       let rows;
@@ -60,7 +65,7 @@ async function startServer() {
     }
   });
 
-  app.post("/api/rankings", (req, res) => {
+  rankingsRouter.post("/", (req, res) => {
     try {
       const { username, score, color_name } = req.body;
       if (!username || score === undefined || !color_name) {
@@ -73,6 +78,8 @@ async function startServer() {
       res.status(500).json({ error: "Internal server error" });
     }
   });
+
+  app.use("/api/rankings", rankingsRouter);
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
