@@ -235,22 +235,22 @@ export default function App() {
           <Sparkles className="fill-white" />
           いろあわせ！<span className="text-sm opacity-70">カラーハンター</span>
         </h1>
-        {gameState !== 'START' && (
-          <div className="flex gap-2">
-            <button 
-              onClick={() => fetchRankings()}
-              className="bg-white border-2 border-[#141414] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-[2px_2px_0px_0px_rgba(20,20,20,1)]"
-            >
-              <Trophy className="w-3 h-3 text-yellow-500" /> ランキング
-            </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => fetchRankings()}
+            className="bg-white border-2 border-[#141414] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-[2px_2px_0px_0px_rgba(20,20,20,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(20,20,20,1)] transition-all"
+          >
+            <Trophy className="w-3 h-3 text-yellow-500" /> ランキング
+          </button>
+          {gameState !== 'START' && (
             <button 
               onClick={resetGame}
-              className="bg-white border-2 border-[#141414] px-3 py-1 rounded-full text-xs font-bold shadow-[2px_2px_0px_0px_rgba(20,20,20,1)]"
+              className="bg-white border-2 border-[#141414] px-3 py-1 rounded-full text-xs font-bold shadow-[2px_2px_0px_0px_rgba(20,20,20,1)] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_0px_rgba(20,20,20,1)] transition-all"
             >
               やめる
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </header>
 
       <main className="max-w-xl mx-auto p-6">
@@ -287,31 +287,40 @@ export default function App() {
               </button>
 
               {/* Top Rankings Preview */}
-              {rankings.length > 0 && (
-                <div className="bg-white border-4 border-[#141414] p-6 rounded-[32px] shadow-[8px_8px_0px_0px_rgba(20,20,20,1)] space-y-4">
-                  <h3 className="text-xl font-black flex items-center justify-center gap-2">
-                    <Trophy className="w-5 h-5 text-yellow-500" />
-                    トップハンター
-                  </h3>
-                  <div className="space-y-2">
-                    {rankings.slice(0, 3).map((entry, i) => (
-                      <div key={entry.id} className="flex items-center justify-between p-2 border-b-2 border-[#141414]/10 last:border-0">
-                        <div className="flex items-center gap-3">
-                          <span className="font-black text-lg">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
-                          <span className="font-bold">{entry.username}</span>
+              <div className="pt-8">
+                {rankings.length > 0 ? (
+                  <div className="bg-white border-4 border-[#141414] p-6 rounded-[32px] shadow-[8px_8px_0px_0px_rgba(20,20,20,1)] space-y-4">
+                    <h3 className="text-xl font-black flex items-center justify-center gap-2">
+                      <Trophy className="w-5 h-5 text-yellow-500" />
+                      今のトップハンター
+                    </h3>
+                    <div className="space-y-2">
+                      {rankings.slice(0, 3).map((entry, i) => (
+                        <div key={entry.id} className="flex items-center justify-between p-2 border-b-2 border-[#141414]/10 last:border-0">
+                          <div className="flex items-center gap-3">
+                            <span className="font-black text-lg">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
+                            <span className="font-bold">{entry.username}</span>
+                          </div>
+                          <span className="font-black text-[#FF6321]">{entry.score}%</span>
                         </div>
-                        <span className="font-black text-[#FF6321]">{entry.score}%</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <button 
+                      onClick={() => fetchRankings()}
+                      className="w-full py-2 bg-[#F5F5F0] border-2 border-[#141414] rounded-xl text-xs font-black uppercase tracking-widest hover:bg-[#FFD700] transition-colors"
+                    >
+                      ランキングをぜんぶ見る！
+                    </button>
                   </div>
+                ) : (
                   <button 
                     onClick={() => fetchRankings()}
-                    className="w-full text-xs font-black uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                    className="flex items-center justify-center gap-2 mx-auto text-sm font-black opacity-50 hover:opacity-100 transition-opacity"
                   >
-                    ランキングをもっとみる
+                    <Trophy className="w-4 h-4" /> ランキングをチェック
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </motion.div>
           )}
 
