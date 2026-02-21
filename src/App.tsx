@@ -38,6 +38,7 @@ export default function App() {
   const [username, setUsername] = useState<string>("");
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [filterColor, setFilterColor] = useState<string>("");
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -72,6 +73,22 @@ export default function App() {
     setGameState('PLAYING');
     startCamera();
   };
+
+  const fetchTopRankings = async () => {
+    try {
+      const res = await fetch('/api/rankings');
+      const data = await res.json();
+      setRankings(data);
+    } catch (err) {
+      console.error("Failed to fetch top rankings:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (gameState === 'START') {
+      fetchTopRankings();
+    }
+  }, [gameState]);
 
   const captureColor = () => {
     if (!videoRef.current || !canvasRef.current || !targetColor) return;
@@ -172,11 +189,13 @@ export default function App() {
     setUsername("");
   };
 
-  const fetchRankings = async () => {
+  const fetchRankings = async (color?: string) => {
     try {
-      const res = await fetch('/api/rankings');
+      const url = color ? `/api/rankings?color_name=${encodeURIComponent(color)}` : '/api/rankings';
+      const res = await fetch(url);
       const data = await res.json();
       setRankings(data);
+      setFilterColor(color || "");
       setGameState('RANKING');
     } catch (err) {
       console.error("Failed to fetch rankings:", err);
@@ -219,7 +238,7 @@ export default function App() {
         {gameState !== 'START' && (
           <div className="flex gap-2">
             <button 
-              onClick={fetchRankings}
+              onClick={() => fetchRankings()}
               className="bg-white border-2 border-[#141414] px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-[2px_2px_0px_0px_rgba(20,20,20,1)]"
             >
               <Trophy className="w-3 h-3 text-yellow-500" /> ランキング
@@ -266,6 +285,33 @@ export default function App() {
                 <Play className="fill-current w-8 h-8" />
                 あそぶ！
               </button>
+
+              {/* Top Rankings Preview */}
+              {rankings.length > 0 && (
+                <div className="bg-white border-4 border-[#141414] p-6 rounded-[32px] shadow-[8px_8px_0px_0px_rgba(20,20,20,1)] space-y-4">
+                  <h3 className="text-xl font-black flex items-center justify-center gap-2">
+                    <Trophy className="w-5 h-5 text-yellow-500" />
+                    トップハンター
+                  </h3>
+                  <div className="space-y-2">
+                    {rankings.slice(0, 3).map((entry, i) => (
+                      <div key={entry.id} className="flex items-center justify-between p-2 border-b-2 border-[#141414]/10 last:border-0">
+                        <div className="flex items-center gap-3">
+                          <span className="font-black text-lg">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
+                          <span className="font-bold">{entry.username}</span>
+                        </div>
+                        <span className="font-black text-[#FF6321]">{entry.score}%</span>
+                      </div>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => fetchRankings()}
+                    className="w-full text-xs font-black uppercase tracking-widest opacity-50 hover:opacity-100 transition-opacity"
+                  >
+                    ランキングをもっとみる
+                  </button>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -437,11 +483,30 @@ export default function App() {
               key="ranking"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              className="space-y-8"
+              className="space-y-6"
             >
               <div className="text-center space-y-2">
-                <Trophy className="w-20 h-20 mx-auto text-[#FFC800] drop-shadow-[4px_4px_0px_#141414]" />
-                <h2 className="text-5xl font-black italic">ランキング</h2>
+                <Trophy className="w-16 h-16 mx-auto text-[#FFC800] drop-shadow-[4px_4px_0px_#141414]" />
+                <h2 className="text-4xl font-black italic">ランキング</h2>
+              </div>
+
+              {/* Color Filter Tabs */}
+              <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
+                <button
+                  onClick={() => fetchRankings()}
+                  className={`shrink-0 px-4 py-2 rounded-full border-2 border-[#141414] font-black text-xs transition-colors shadow-[2px_2px_0px_0px_rgba(20,20,20,1)] ${!filterColor ? 'bg-[#FFD700]' : 'bg-white'}`}
+                >
+                  すべて
+                </button>
+                {["さくら色", "そらいろ", "わかくさいろ", "ひまわりいろ", "あかいろ", "きんいろ"].map(c => (
+                  <button
+                    key={c}
+                    onClick={() => fetchRankings(c)}
+                    className={`shrink-0 px-4 py-2 rounded-full border-2 border-[#141414] font-black text-xs transition-colors shadow-[2px_2px_0px_0px_rgba(20,20,20,1)] ${filterColor === c ? 'bg-[#FFD700]' : 'bg-white'}`}
+                  >
+                    {c}
+                  </button>
+                ))}
               </div>
 
               <div className="bg-white border-4 border-[#141414] rounded-[40px] shadow-[12px_12px_0px_0px_rgba(20,20,20,1)] overflow-hidden">

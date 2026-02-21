@@ -24,7 +24,13 @@ async function startServer() {
 
   // API Routes
   app.get("/api/rankings", (req, res) => {
-    const rows = db.prepare("SELECT * FROM rankings ORDER BY score DESC LIMIT 10").all();
+    const { color_name } = req.query;
+    let rows;
+    if (color_name) {
+      rows = db.prepare("SELECT * FROM rankings WHERE color_name = ? ORDER BY score DESC LIMIT 10").all(color_name);
+    } else {
+      rows = db.prepare("SELECT * FROM rankings ORDER BY score DESC LIMIT 10").all();
+    }
     res.json(rows);
   });
 
