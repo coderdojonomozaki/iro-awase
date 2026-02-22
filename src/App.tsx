@@ -565,10 +565,10 @@ export default function App() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b-4 border-[#141414] bg-[#FFD700]">
-                      <th className="p-4 text-sm font-black uppercase">順位</th>
-                      <th className="p-4 text-sm font-black uppercase">なまえ</th>
-                      <th className="p-4 text-sm font-black uppercase">色</th>
-                      <th className="p-4 text-sm font-black uppercase text-right">スコア</th>
+                      <th className="p-4 text-sm font-black uppercase whitespace-nowrap">順位</th>
+                      <th className="p-4 text-sm font-black uppercase whitespace-nowrap">なまえ</th>
+                      <th className="p-4 text-sm font-black uppercase whitespace-nowrap">色</th>
+                      <th className="p-4 text-sm font-black uppercase text-right whitespace-nowrap">スコア</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -577,9 +577,13 @@ export default function App() {
                         <td className="p-4 font-black text-xl">
                           {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}`}
                         </td>
-                        <td className="p-4 font-black text-lg">{entry.username}</td>
-                        <td className="p-4 text-sm font-bold opacity-70">{entry.color_name}</td>
-                        <td className="p-4 text-right font-black text-2xl text-[#FF6321]">{entry.score}%</td>
+                        <td className="p-4 font-black text-lg">
+                          <div className="truncate max-w-[100px] sm:max-w-none">
+                            {entry.username}
+                          </div>
+                        </td>
+                        <td className="p-4 text-sm font-bold opacity-70 whitespace-nowrap">{entry.color_name}</td>
+                        <td className="p-4 text-right font-black text-2xl text-[#FF6321] whitespace-nowrap">{entry.score}%</td>
                       </tr>
                     ))}
                     {rankings.length === 0 && (
