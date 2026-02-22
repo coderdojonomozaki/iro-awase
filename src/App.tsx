@@ -66,9 +66,13 @@ export default function App() {
       connectStream();
 
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Camera error:", err);
-      setError("カメラの起動に失敗しました。設定を確認してください。");
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setError("カメラの使用が許可されていません。ブラウザの設定でカメラを許可してください。");
+      } else {
+        setError("カメラの起動に失敗しました。他のアプリでカメラを使っていないか確認してください。");
+      }
     }
   };
 
@@ -183,19 +187,22 @@ export default function App() {
 
   const generateCommentary = async (targetName: string, targetHex: string, captured: RGB, score: number) => {
     try {
-      // Try to get API key from process.env (Vite define)
-      const apiKey = process.env.GEMINI_API_KEY;
+      // Try multiple ways to get the API key
+      const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
       
-      console.log("Checking API Key...");
       if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY" || apiKey === "") {
-        console.error("API Key is missing or invalid in process.env. Checking fallback...");
+        console.error("API Key is missing or invalid.");
+        
         // Fallback to a check that might work in some environments
         const fallbackKey = (window as any).GEMINI_API_KEY;
         if (fallbackKey) {
            const ai = new GoogleGenAI({ apiKey: fallbackKey });
            return await performGeneration(ai);
         }
-        throw new Error("Gemini APIキーが設定されていません。AI StudioのSecretsパネルで 'GEMINI_API_KEY' を追加してください。");
+        
+        setCommentary(`${score}点！いい色を見つけたね！✨ (AIコメントを表示するにはAPIキーの設定が必要です)`);
+        setGameState('RESULT');
+        return;
       }
       
       const ai = new GoogleGenAI({ apiKey });
@@ -421,32 +428,47 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Camera View */}
-              <div className="relative aspect-square bg-black rounded-[40px] overflow-hidden border-4 border-[#141414] shadow-[12px_12px_0px_0px_rgba(20,20,20,1)]">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-                
-                {/* Target Reticle */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-32 h-32 border-4 border-white rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  </div>
+                {/* Camera View */}
+                <div className="relative aspect-square bg-black rounded-[40px] overflow-hidden border-4 border-[#141414] shadow-[12px_12px_0px_0px_rgba(20,20,20,1)]">
+                  {error ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center space-y-4 bg-zinc-900 text-white">
+                      <AlertCircle className="w-16 h-16 text-red-500" />
+                      <p className="font-bold">{error}</p>
+                      <button 
+                        onClick={() => { setError(null); startCamera(); }}
+                        className="bg-white text-black px-6 py-2 rounded-full font-black text-sm"
+                      >
+                        もういちど試す
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <video
+                        ref={videoRef}
+                        autoPlay
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
+                      
+                      {/* Target Reticle */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="w-32 h-32 border-4 border-white rounded-full flex items-center justify-center">
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        </div>
+                      </div>
+  
+                      {/* Capture Button Overlay */}
+                      <div className="absolute bottom-8 left-0 w-full flex justify-center">
+                        <button
+                          onClick={captureColor}
+                          className="w-24 h-24 bg-white rounded-full border-4 border-[#141414] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-transform"
+                        >
+                          <div className="w-16 h-16 bg-red-500 rounded-full border-4 border-[#141414]" />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-
-                {/* Capture Button Overlay */}
-                <div className="absolute bottom-8 left-0 w-full flex justify-center">
-                  <button
-                    onClick={captureColor}
-                    className="w-24 h-24 bg-white rounded-full border-4 border-[#141414] flex items-center justify-center shadow-xl hover:scale-110 active:scale-95 transition-transform"
-                  >
-                    <div className="w-16 h-16 bg-red-500 rounded-full border-4 border-[#141414]" />
-                  </button>
-                </div>
-              </div>
             </motion.div>
           )}
 
