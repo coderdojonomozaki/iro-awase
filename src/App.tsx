@@ -5,9 +5,8 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Camera, RefreshCw, Check, AlertCircle, Trophy, Sparkles, Play } from 'lucide-react';
+import { Camera, RefreshCw, Trophy, Sparkles, Play, AlertCircle } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { getRandomColor, calculateColorDistance, hexToRgb, rgbToHex, RGB } from './utils/colorUtils';
 
 // --- Types ---
@@ -182,70 +181,59 @@ export default function App() {
     setScore(calculatedScore);
     setGameState('LOADING');
     stopCamera();
-    generateCommentary(targetColor.name, targetColor.hex, avgColor, calculatedScore);
+    
+    // Small delay to feel like it's "calculating"
+    setTimeout(() => {
+      generateCommentary(calculatedScore);
+    }, 1500);
   };
 
-  const generateCommentary = async (targetName: string, targetHex: string, captured: RGB, score: number) => {
-    try {
-      // Try multiple ways to get the API key
-      const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env?.VITE_GEMINI_API_KEY;
-      
-      if (!apiKey || apiKey === "undefined" || apiKey === "MY_GEMINI_API_KEY" || apiKey === "") {
-        console.error("API Key is missing or invalid.");
-        
-        // Fallback to a check that might work in some environments
-        const fallbackKey = (window as any).GEMINI_API_KEY;
-        if (fallbackKey) {
-           const ai = new GoogleGenAI({ apiKey: fallbackKey });
-           return await performGeneration(ai);
-        }
-        
-        setCommentary(`${score}点！いい色を見つけたね！✨ (AIコメントを表示するにはAPIキーの設定が必要です)`);
-        setGameState('RESULT');
-        return;
-      }
-      
-      const ai = new GoogleGenAI({ apiKey });
-      return await performGeneration(ai);
+  const generateCommentary = (score: number) => {
+    const comments = {
+      legend: [
+        "伝説のカラーハンター！完璧すぎる！✨👑🌈",
+        "奇跡のショットだね！完璧だよ！💎✨",
+        "すごい！色がぴったりすぎてびっくり！🌈✨"
+      ],
+      pro: [
+        "すごい！天才！色がぴったりだよ！🌟👏💖",
+        "君の目は魔法のカメラみたいだね！🌟👏",
+        "色のセンスがばつぐんだね！🌟👏💖"
+      ],
+      good: [
+        "いい感じ！かなり近い色を見つけたね！👍✨😊",
+        "ナイスハンティング！いい色だね！🍀✨",
+        "お見事！あともう少しで完璧だよ！👍🔥"
+      ],
+      average: [
+        "おしい！なかなかいい線いってるよ！💪🔥🐾",
+        "次はもっと似てる色を探してみよう！🎈✨",
+        "いいチャレンジだね！次はもっといけるよ！💪✨"
+      ],
+      tryAgain: [
+        "どんまい！この色は難しかったかな？🍀✨🎈",
+        "次はきっと見つかるよ！応援してるよ！🧸✨",
+        "あきらめないで！次はもっと似てるはず！🍀🔥"
+      ]
+    };
 
-      async function performGeneration(aiInstance: any) {
-        const capturedHex = rgbToHex(captured);
-        const response = await aiInstance.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: `
-            あなたは子供向けゲームの明るい審判です。
-            お題: ${targetName}
-            撮影: ${capturedHex}
-            スコア: ${score}点
-            
-            スコアに応じた元気な一言コメントを1つ作ってください。
-            - 90点以上: 大絶賛！
-            - 70-89点: 褒める
-            - 50-69点: 惜しいと励ます
-            - 50点未満: 次回に期待
-            
-            ルール: ひらがな多め、絵文字3個以上、50文字以内。
-          `,
-          config: {
-            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
-          }
-        });
-        
-        const text = response.text?.trim();
-        setCommentary(text || `${score}点！いい色を見つけたね！次はもっと高得点をねらってみよう！✨`);
-        setGameState('RESULT');
-        if (score >= 80) {
-          confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 }
-          });
-        }
-      }
-    } catch (err) {
-      console.error("Gemini error:", err);
-      setCommentary("素晴らしい色覚の持ち主ですね！");
-      setGameState('RESULT');
+    let selectedList;
+    if (score >= 95) selectedList = comments.legend;
+    else if (score >= 85) selectedList = comments.pro;
+    else if (score >= 70) selectedList = comments.good;
+    else if (score >= 50) selectedList = comments.average;
+    else selectedList = comments.tryAgain;
+
+    const randomComment = selectedList[Math.floor(Math.random() * selectedList.length)];
+    setCommentary(randomComment);
+    setGameState('RESULT');
+
+    if (score >= 80) {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
     }
   };
 
@@ -511,6 +499,7 @@ export default function App() {
                     style={{ backgroundColor: targetColor.hex }}
                   />
                   <p className="font-black text-center">{targetColor.name}</p>
+                  <p className="text-[10px] font-mono text-center opacity-50">{targetColor.hex}</p>
                 </div>
                 <div className="bg-white border-4 border-[#141414] p-4 rounded-[32px] shadow-[6px_6px_0px_0px_rgba(20,20,20,1)]">
                   <p className="text-xs font-black uppercase opacity-50 mb-2">とった色</p>
@@ -519,6 +508,7 @@ export default function App() {
                     style={{ backgroundColor: rgbToHex(capturedColor) }}
                   />
                   <p className="font-black text-center">キミの色！</p>
+                  <p className="text-[10px] font-mono text-center opacity-50">{rgbToHex(capturedColor)}</p>
                 </div>
               </div>
 
