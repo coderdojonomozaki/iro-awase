@@ -28,11 +28,8 @@ export const calculateColorDistance = (c1: RGB, c2: RGB): number => {
   const maxDistance = Math.sqrt(255 * 255 * 3);
   
   // More severe scoring: use a power function to penalize distance more heavily
-  // (distance / maxDistance) is 0 to 1.
-  // 1 - (dist/max)^0.5 would be more lenient.
-  // 1 - (dist/max)^2 would be more severe.
   const normalizedDist = distance / maxDistance;
-  const score = Math.max(0, 100 * (1 - Math.pow(normalizedDist, 0.7) * 1.5));
+  const score = Math.max(0, 100 * (1 - Math.pow(normalizedDist, 0.6) * 2.0));
   
   return Math.round(score);
 };
@@ -54,6 +51,21 @@ export const getRandomColor = (): { name: string; hex: string } => {
     { name: "やまぶきいろ (Orange)", hex: "#FFA400" },
     { name: "あいいろ (Navy)", hex: "#165E83" },
     { name: "ぼたんいろ (Magenta)", hex: "#E7609E" },
+    { name: "みかんいろ (Orange)", hex: "#F08300" },
+    { name: "れもんいろ (Lemon)", hex: "#FFF352" },
+    { name: "みずいろ (Light Blue)", hex: "#BCE2E8" },
+    { name: "なすびいろ (Eggplant)", hex: "#4D213D" },
+    { name: "くりいろ (Chestnut)", hex: "#762E05" },
+    { name: "こけいろ (Moss)", hex: "#69821B" },
+    { name: "あかねいろ (Madder)", hex: "#B33E5C" },
+    { name: "しろいろ (White)", hex: "#F2F2F2" },
+    { name: "はいいろ (Gray)", hex: "#7D7D7D" },
+    { name: "こむぎいろ (Wheat)", hex: "#E49E61" },
+    { name: "べにいろ (Crimson)", hex: "#D7003A" },
+    { name: "うぐいすいろ (Olive)", hex: "#838A2D" },
+    { name: "そらまめいろ (Pale Green)", hex: "#D7E7AF" },
+    { name: "ときいろ (Ibis Pink)", hex: "#F4B3C2" },
+    { name: "こんいろ (Navy)", hex: "#001E43" },
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 };

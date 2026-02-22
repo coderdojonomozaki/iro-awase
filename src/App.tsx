@@ -68,7 +68,31 @@ export default function App() {
     }
   };
 
+  const playPopSound = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
+
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {
+      console.error("Audio error:", e);
+    }
+  };
+
   const startGame = () => {
+    playPopSound();
     setTargetColor(getRandomColor());
     setGameState('PLAYING');
     startCamera();
@@ -91,6 +115,7 @@ export default function App() {
   }, [gameState]);
 
   const captureColor = () => {
+    playPopSound();
     if (!videoRef.current || !canvasRef.current || !targetColor) return;
 
     const canvas = canvasRef.current;
@@ -195,6 +220,7 @@ export default function App() {
   };
 
   const resetGame = () => {
+    playPopSound();
     setGameState('START');
     setTargetColor(null);
     setCapturedColor(null);
@@ -205,6 +231,7 @@ export default function App() {
   };
 
   const fetchRankings = async (color?: string) => {
+    playPopSound();
     try {
       const url = color ? `/api/rankings?color_name=${encodeURIComponent(color)}` : '/api/rankings';
       const res = await fetch(url);
@@ -219,6 +246,7 @@ export default function App() {
 
   const saveScore = async () => {
     if (!username.trim() || !targetColor) return;
+    playPopSound();
     setIsSaving(true);
     try {
       await fetch('/api/rankings', {
