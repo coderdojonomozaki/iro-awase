@@ -5,8 +5,12 @@ import path from "path";
 
 const db = (() => {
   try {
-    const database = new Database("rankings.db");
-    console.log("Database initialized successfully");
+    // NOTE: Vercel is serverless. Filesystem changes to rankings.db will NOT persist
+    // across requests or redeploys. For real persistence on Vercel, use a managed
+    // database like Vercel Postgres or Neon.
+    const dbPath = process.env.NODE_ENV === "production" ? "/tmp/rankings.db" : "rankings.db";
+    const database = new Database(dbPath);
+    console.log(`Database initialized at ${dbPath}`);
     return database;
   } catch (err) {
     console.error("Failed to initialize database, using in-memory:", err);
