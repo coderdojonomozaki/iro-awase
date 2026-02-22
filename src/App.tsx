@@ -585,7 +585,7 @@ export default function App() {
                       <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase whitespace-nowrap">順位</th>
                       <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase whitespace-nowrap">なまえ</th>
                       <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase whitespace-nowrap">色</th>
-                      <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase text-right whitespace-nowrap">スコア</th>
+                      <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase text-center whitespace-nowrap">スコア</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -600,7 +600,7 @@ export default function App() {
                           </div>
                         </td>
                         <td className="p-2 sm:p-4 text-xs sm:text-sm font-bold opacity-70 whitespace-nowrap">{entry.color_name}</td>
-                        <td className="p-2 sm:p-4 text-right font-black text-lg sm:text-2xl text-[#FF6321] whitespace-nowrap">{entry.score}%</td>
+                        <td className="p-2 sm:p-4 text-center font-black text-lg sm:text-2xl text-[#FF6321] whitespace-nowrap">{entry.score}%</td>
                       </tr>
                     ))}
                     {rankings.length === 0 && (
