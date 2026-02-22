@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Camera, RefreshCw, Check, AlertCircle, Trophy, Sparkles, Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { getRandomColor, calculateColorDistance, hexToRgb, rgbToHex, RGB } from './utils/colorUtils';
 
 // --- Types ---
@@ -206,29 +206,22 @@ export default function App() {
         const response = await aiInstance.models.generateContent({
           model: "gemini-3-flash-preview",
           contents: `
-            あなたは「いろあわせ！カラーハンター」というゲームの、とても明るくて元気な審判です。
-            今、小学生の子供が「${targetName}」というお題に対して、カメラで色を撮影しました。
+            あなたは子供向けゲームの明るい審判です。
+            お題: ${targetName}
+            撮影: ${capturedHex}
+            スコア: ${score}点
             
-            【結果データ】
-            - お題の色: ${targetName} (${targetHex})
-            - 撮影された色: ${capturedHex}
-            - マッチ度（スコア）: ${score}点 / 100点
+            スコアに応じた元気な一言コメントを1つ作ってください。
+            - 90点以上: 大絶賛！
+            - 70-89点: 褒める
+            - 50-69点: 惜しいと励ます
+            - 50点未満: 次回に期待
             
-            【あなたの任務】
-            このスコアを見て、子供が最高にワクワクするようなコメントを1つだけ作成してください。
-            
-            【スコア別のコメント方針（必ず守ってください）】
-            - 95点以上：超・超・超すごい！伝説級のカラーハンターだ！完璧すぎる！奇跡のショットだね！✨👑🌈💎
-            - 85点〜94点：天才あらわる！色がぴったり！君の目は魔法のカメラみたいだね！🌟👏💖🔥
-            - 70点〜84点：お見事！かなり近い色を見つけたね！その調子でどんどんハントしよう！👍✨😊🍀
-            - 50点〜69点：おしい！いい線いってるよ！あとちょっとで完璧だったね！次はもっと似てる色を探してみよう！💪🔥🐾🎈
-            - 50点未満：どんまい！この色はかくれんぼが上手だったみたいだね。次はきっと見つかるよ！応援してるよ！🍀✨🎈🧸
-
-            【制約事項】
-            - 100文字以内で、ひらがなを多めに使ってください（漢字には読みがなを振るか、簡単な漢字だけにしてください）。
-            - 毎回同じような文章にならないよう、語尾や言い回しを工夫してバリエーション豊かにしてください。
-            - 絵文字を3個以上使って、画面を華やかにしてください。
+            ルール: ひらがな多め、絵文字3個以上、50文字以内。
           `,
+          config: {
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+          }
         });
         
         const text = response.text?.trim();

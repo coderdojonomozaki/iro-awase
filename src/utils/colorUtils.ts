@@ -27,9 +27,9 @@ export const calculateColorDistance = (c1: RGB, c2: RGB): number => {
   // Max distance is sqrt(255^2 * 3) approx 441.67
   const maxDistance = Math.sqrt(255 * 255 * 3);
   
-  // More severe scoring: use a power function to penalize distance more heavily
+  // More lenient scoring: use a power function that drops off more slowly
   const normalizedDist = distance / maxDistance;
-  const score = Math.max(0, 100 * (1 - Math.pow(normalizedDist, 0.6) * 2.0));
+  const score = Math.max(0, 100 * (1 - Math.pow(normalizedDist, 0.8) * 1.5));
   
   return Math.round(score);
 };
