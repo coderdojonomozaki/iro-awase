@@ -561,29 +561,29 @@ export default function App() {
                 ))}
               </div>
 
-              <div className="bg-white border-4 border-[#141414] rounded-[40px] shadow-[12px_12px_0px_0px_rgba(20,20,20,1)] overflow-hidden">
-                <table className="w-full text-left border-collapse">
+              <div className="bg-white border-4 border-[#141414] rounded-[40px] shadow-[12px_12px_0px_0px_rgba(20,20,20,1)] overflow-x-auto no-scrollbar">
+                <table className="w-full text-left border-collapse min-w-[320px]">
                   <thead>
                     <tr className="border-b-4 border-[#141414] bg-[#FFD700]">
-                      <th className="p-4 text-sm font-black uppercase whitespace-nowrap">順位</th>
-                      <th className="p-4 text-sm font-black uppercase whitespace-nowrap">なまえ</th>
-                      <th className="p-4 text-sm font-black uppercase whitespace-nowrap">色</th>
-                      <th className="p-4 text-sm font-black uppercase text-right whitespace-nowrap">スコア</th>
+                      <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase whitespace-nowrap">順位</th>
+                      <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase whitespace-nowrap">なまえ</th>
+                      <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase whitespace-nowrap">色</th>
+                      <th className="p-2 sm:p-4 text-xs sm:text-sm font-black uppercase text-right whitespace-nowrap">スコア</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rankings.map((entry, index) => (
                       <tr key={entry.id} className="border-b-2 border-[#141414]/10 hover:bg-[#00FF00]/10 transition-colors">
-                        <td className="p-4 font-black text-xl">
+                        <td className="p-2 sm:p-4 font-black text-base sm:text-xl">
                           {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}`}
                         </td>
-                        <td className="p-4 font-black text-lg">
-                          <div className="truncate max-w-[100px] sm:max-w-none">
+                        <td className="p-2 sm:p-4 font-black text-sm sm:text-lg">
+                          <div className="truncate max-w-[60px] xs:max-w-[100px] sm:max-w-none">
                             {entry.username}
                           </div>
                         </td>
-                        <td className="p-4 text-sm font-bold opacity-70 whitespace-nowrap">{entry.color_name}</td>
-                        <td className="p-4 text-right font-black text-2xl text-[#FF6321] whitespace-nowrap">{entry.score}%</td>
+                        <td className="p-2 sm:p-4 text-xs sm:text-sm font-bold opacity-70 whitespace-nowrap">{entry.color_name}</td>
+                        <td className="p-2 sm:p-4 text-right font-black text-lg sm:text-2xl text-[#FF6321] whitespace-nowrap">{entry.score}%</td>
                       </tr>
                     ))}
                     {rankings.length === 0 && (
