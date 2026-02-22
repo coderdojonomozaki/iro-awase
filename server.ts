@@ -147,11 +147,24 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  if (process.env.VERCEL !== "1") {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  }
+  
+  return app;
 }
 
-startServer().catch(err => {
+const appPromise = startServer().catch(err => {
   console.error("Failed to start server:", err);
 });
+
+export default async (req: any, res: any) => {
+  const app = await appPromise;
+  if (app) {
+    app(req, res);
+  } else {
+    res.status(500).send("Server failed to initialize");
+  }
+};
