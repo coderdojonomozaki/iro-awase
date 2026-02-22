@@ -46,14 +46,25 @@ export default function App() {
 
   const startCamera = async () => {
     try {
+      stopCamera();
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
         audio: false,
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        streamRef.current = stream;
-      }
+      streamRef.current = stream;
+      
+      // Ensure video element is connected, retry if necessary (handles animation delays)
+      let attempts = 0;
+      const connectStream = () => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        } else if (attempts < 20) {
+          attempts++;
+          setTimeout(connectStream, 50);
+        }
+      };
+      connectStream();
+
       setError(null);
     } catch (err) {
       console.error("Camera error:", err);
@@ -65,6 +76,9 @@ export default function App() {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
   };
 
@@ -95,7 +109,6 @@ export default function App() {
     playPopSound();
     setTargetColor(getRandomColor());
     setGameState('PLAYING');
-    startCamera();
   };
 
   const fetchTopRankings = async () => {
@@ -111,6 +124,9 @@ export default function App() {
   useEffect(() => {
     if (gameState === 'START') {
       fetchTopRankings();
+    }
+    if (gameState === 'PLAYING') {
+      startCamera();
     }
   }, [gameState]);
 
@@ -221,6 +237,7 @@ export default function App() {
 
   const resetGame = () => {
     playPopSound();
+    stopCamera();
     setGameState('START');
     setTargetColor(null);
     setCapturedColor(null);
