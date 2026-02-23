@@ -117,8 +117,9 @@ export default function App() {
   const fetchTopRankings = async () => {
     try {
       const res = await fetch('/api/rankings');
+      if (!res.ok) return;
       const data = await res.json();
-      setRankings(data);
+      setRankings(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch top rankings:", err);
     }
@@ -254,12 +255,15 @@ export default function App() {
     try {
       const url = color ? `/api/rankings?color_name=${encodeURIComponent(color)}` : '/api/rankings';
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`Server error: ${res.status}`);
       const data = await res.json();
-      setRankings(data);
+      setRankings(Array.isArray(data) ? data : []);
       setFilterColor(color || "");
       setGameState('RANKING');
     } catch (err) {
       console.error("Failed to fetch rankings:", err);
+      setRankings([]);
+      setGameState('RANKING');
     }
   };
 

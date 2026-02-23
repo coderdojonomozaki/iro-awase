@@ -3,7 +3,7 @@ import path from "path";
 import { neon } from "@neondatabase/serverless";
 
 // Database abstraction to handle both SQLite (local) and Neon (Postgres)
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL;
 const isNeon = !!databaseUrl;
 let db: any = null;
 
@@ -30,6 +30,7 @@ async function getDb() {
 // Initialize database table
 async function initDb() {
   if (isNeon && sql) {
+    console.log("Attempting to initialize Neon Postgres...");
     try {
       await sql`
         CREATE TABLE IF NOT EXISTS rankings (
@@ -43,8 +44,10 @@ async function initDb() {
       console.log("Neon Postgres table 'rankings' ensured");
     } catch (err) {
       console.error("Failed to create Neon Postgres table:", err);
+      console.error("Check if DATABASE_URL is correct and the database is accessible.");
     }
   } else {
+    console.log("Neon not configured, using local SQLite.");
     const localDb = await getDb();
     if (localDb) {
       try {
