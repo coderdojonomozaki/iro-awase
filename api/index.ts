@@ -1,13 +1,16 @@
 import express from "express";
 import path from "path";
-import { sql } from "@vercel/postgres";
+import { neon } from "@neondatabase/serverless";
 
-// Database abstraction to handle both SQLite (local) and Postgres (Vercel)
-const isPostgres = !!process.env.POSTGRES_URL;
+// Database abstraction to handle both SQLite (local) and Neon (Postgres)
+const databaseUrl = process.env.DATABASE_URL;
+const isNeon = !!databaseUrl;
 let db: any = null;
 
+const sql = isNeon ? neon(databaseUrl!) : null;
+
 async function getDb() {
-  if (isPostgres) return null;
+  if (isNeon) return null;
   if (db) return db;
   
   try {
@@ -26,7 +29,7 @@ async function getDb() {
 
 // Initialize database table
 async function initDb() {
-  if (isPostgres) {
+  if (isNeon && sql) {
     try {
       await sql`
         CREATE TABLE IF NOT EXISTS rankings (
@@ -37,9 +40,9 @@ async function initDb() {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `;
-      console.log("Postgres table 'rankings' ensured");
+      console.log("Neon Postgres table 'rankings' ensured");
     } catch (err) {
-      console.error("Failed to create Postgres table:", err);
+      console.error("Failed to create Neon Postgres table:", err);
     }
   } else {
     const localDb = await getDb();
@@ -82,13 +85,11 @@ async function startServer() {
       const { color_name } = req.query;
       let rows;
 
-      if (isPostgres) {
+      if (isNeon && sql) {
         if (color_name) {
-          const result = await sql`SELECT * FROM rankings WHERE color_name = ${color_name as string} ORDER BY score DESC LIMIT 10`;
-          rows = result.rows;
+          rows = await (sql as any)("SELECT * FROM rankings WHERE color_name = $1 ORDER BY score DESC LIMIT 10", [color_name as string]);
         } else {
-          const result = await sql`SELECT * FROM rankings ORDER BY score DESC LIMIT 10`;
-          rows = result.rows;
+          rows = await (sql as any)("SELECT * FROM rankings ORDER BY score DESC LIMIT 10");
         }
       } else {
         const localDb = await getDb();
@@ -112,13 +113,12 @@ async function startServer() {
         return res.status(400).json({ error: "Missing fields" });
       }
 
-      if (isPostgres) {
-        const result = await sql`
-          INSERT INTO rankings (username, score, color_name) 
-          VALUES (${username}, ${score}, ${color_name})
-          RETURNING id
-        `;
-        res.json({ id: result.rows[0].id });
+      if (isNeon && sql) {
+        const result = await (sql as any)(
+          "INSERT INTO rankings (username, score, color_name) VALUES ($1, $2, $3) RETURNING id",
+          [username, score, color_name]
+        );
+        res.json({ id: result[0].id });
       } else {
         const localDb = await getDb();
         const info = localDb.prepare("INSERT INTO rankings (username, score, color_name) VALUES (?, ?, ?)").run(username, score, color_name);
