@@ -80,6 +80,15 @@ async function startServer() {
   // Ensure DB is initialized
   await initDb();
 
+  // Health check for Vercel/Monitoring
+  app.get("/api/health", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      database: isNeon ? "neon" : "sqlite",
+      env: process.env.NODE_ENV 
+    });
+  });
+
   // API Routes
   const rankingsRouter = express.Router();
 
@@ -144,9 +153,10 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static(path.join(process.cwd(), "dist")));
+    const distPath = path.resolve(process.cwd(), "dist");
+    app.use(express.static(distPath));
     app.get("*", (req, res) => {
-      res.sendFile(path.join(process.cwd(), "dist", "index.html"));
+      res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
