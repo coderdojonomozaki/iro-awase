@@ -99,9 +99,9 @@ async function startServer() {
 
       if (isNeon && sql) {
         if (color_name) {
-          rows = await (sql as any)("SELECT * FROM rankings WHERE color_name = $1 ORDER BY score DESC LIMIT 10", [color_name as string]);
+          rows = await sql`SELECT * FROM rankings WHERE color_name = ${color_name as string} ORDER BY score DESC LIMIT 10`;
         } else {
-          rows = await (sql as any)("SELECT * FROM rankings ORDER BY score DESC LIMIT 10");
+          rows = await sql`SELECT * FROM rankings ORDER BY score DESC LIMIT 10`;
         }
       } else {
         const localDb = await getDb();
@@ -126,10 +126,11 @@ async function startServer() {
       }
 
       if (isNeon && sql) {
-        const result = await (sql as any)(
-          "INSERT INTO rankings (username, score, color_name) VALUES ($1, $2, $3) RETURNING id",
-          [username, score, color_name]
-        );
+        const result = await sql`
+          INSERT INTO rankings (username, score, color_name) 
+          VALUES (${username}, ${score}, ${color_name}) 
+          RETURNING id
+        `;
         res.json({ id: result[0].id });
       } else {
         const localDb = await getDb();
