@@ -38,7 +38,6 @@ export default function App() {
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [filterColor, setFilterColor] = useState<string>("");
-  const [dbStatus, setDbStatus] = useState<'neon' | 'sqlite' | 'loading'>('loading');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -121,13 +120,6 @@ export default function App() {
       if (!res.ok) return;
       const data = await res.json();
       setRankings(Array.isArray(data) ? data : []);
-      
-      // Also check health/db status
-      const healthRes = await fetch('/api/health');
-      if (healthRes.ok) {
-        const healthData = await healthRes.json();
-        setDbStatus(healthData.database);
-      }
     } catch (err) {
       console.error("Failed to fetch top rankings:", err);
     }
@@ -588,14 +580,6 @@ export default function App() {
               <div className="text-center space-y-2">
                 <Trophy className="w-16 h-16 mx-auto text-[#FFC800] drop-shadow-[4px_4px_0px_#141414]" />
                 <h2 className="text-4xl font-black italic">ランキング</h2>
-                
-                {/* Persistence Status Badge */}
-                <div className="flex justify-center pt-2">
-                  <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border-2 border-[#141414] text-[10px] font-black uppercase tracking-tighter shadow-[2px_2px_0px_0px_rgba(20,20,20,1)] ${dbStatus === 'neon' ? 'bg-[#00FF00]' : 'bg-[#FFD700]'}`}>
-                    <div className={`w-2 h-2 rounded-full border border-[#141414] ${dbStatus === 'neon' ? 'bg-white animate-pulse' : 'bg-white/50'}`} />
-                    {dbStatus === 'neon' ? 'データ保存：OK (Neon)' : 'データ保存：一時的 (SQLite)'}
-                  </div>
-                </div>
               </div>
 
               {/* Color Filter Tabs */}
